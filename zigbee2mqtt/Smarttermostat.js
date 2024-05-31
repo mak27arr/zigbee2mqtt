@@ -1,3 +1,4 @@
+// Tested with Zigbee2MQTT 1.37.1-1
 const fz = require('zigbee-herdsman-converters/converters/fromZigbee');
 const tz = require('zigbee-herdsman-converters/converters/toZigbee');
 const exposes = require('zigbee-herdsman-converters/lib/exposes');
