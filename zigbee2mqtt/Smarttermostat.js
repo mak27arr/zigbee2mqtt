@@ -44,23 +44,26 @@ const fz2 = {
                     return {child_lock: value ? 'LOCK' : 'UNLOCK'};
     
             case 34:
-                return {voltage: (value / 0.05).toFixed(1), battery: ((value / 0.05) - 2100) / 10}; //probably incorect
+                //97x = 2.673v
+                //135x = 3.052v
+                //157x = 3.268v
+                return {voltage: (value / 0.05).toFixed(1), battery: ((value / 0.05) - 2100) / 10}; //incorect
 
-            case 101: //heat temperature
+            case 101: //comfort temperature
                 return {heat_temperature: (value / 2).toFixed(1)};
 
             case 102: //away temperature
                 return {away_temperature: (value / 2).toFixed(1)};
 
-            //case 103: need fine value: [19,1,1,0,0,34,0,0]
-
+            //case 103: // value: [19,1,1,0,0,34,0,0] maybe date
+            //case 104: "data":[255,255,255,251] 
             case 105:
                 return {current_heating_setpoint_auto: (value / 2).toFixed(1)};
 
             case 106: //close 118 countdown
                 return {timer: value};
             
-            //case 107: //need fine value [0]
+            //case 107: // value [0] maybe temp corection
 
             case 116:
                 return {open_window_temperature: value / 2};
@@ -71,11 +74,12 @@ const fz2 = {
             case 118:
                 return {boost_time: value};
 
-            case 109: // mon "data":[1,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
-            //case 110: something related data":[2,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
-            // case 111: data":[3,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
-            //case 112: "data":[4,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
-            //case 113: "data":[5,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
+            // case id: - day of week
+            case 109: // "data":[1,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
+            case 110: // data":[2,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
+            case 111: //data":[3,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
+            case 112: //"data":[4,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
+            case 113: //"data":[5,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
             case 114: // week "data":[6,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
             case 115: // sun "data":[7,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
                 const days = {0: '???', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday', 7: 'Sunday'};
@@ -154,7 +158,7 @@ const tz2 = {
             case 'off':
                 await tuya.sendDataPointRaw(entity, 16, [0, 0 ,0, 0]);
                 await tuya.sendDataPointRaw(entity, 2, [1]);
-                //await tuya.sendDataPointRaw(entity, 2, [2]);
+                //await tuya.sendDataPointRaw(entity, 2, [2]);//holiday mode
                 break;
             default:
                 meta.logger.info(`awow_thermostat_current_mode  value #${value}`);
