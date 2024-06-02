@@ -83,27 +83,19 @@ const fz2 = {
             case 114: // week "data":[6,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
             case 115: // sun "data":[7,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
                 const days = {0: '???', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday', 7: 'Sunday'};
-
                 //  SUN 20  6:00 21  9:00 22  10:00 23  23:00 17  24:00
-
                 // [7,  40, 24,  42, 36,  44, 40,   46, 92,   34, 96,    42,96,34,96,42,96,34]
                 //   1,   34, 24,  42,36,34,68,42,92,34,96,42,96,34,96,    42,96,34,96,42,96,34
-
-                if (value[0] == 7) {
-
-                    return {
-                        program_sunday: {
-                            sunday: [
-                                '0h:0m ' + value[1] / 2 + '°C',
-                                '' + parseInt(value[2] / 4) + 'h:' + (value[2] - parseInt(value[2])) * 15 + 'm ' + value[3] / 2 + '°C',
-                                '' + parseInt(value[4] / 4) + 'h:' + (value[4] - parseInt(value[4])) * 15 + 'm ' + value[5] / 2 + '°C',
-                                '' + parseInt(value[6] / 4) + 'h:' + (value[6] - parseInt(value[6])) * 15 + 'm ' + value[7] / 2 + '°C',
-                                '' + parseInt(value[8] / 4) + 'h:' + (value[8] - parseInt(value[8])) * 15 + 'm ' + value[9] / 2 + '°C',
-                                '' + parseInt(value[10] / 4) + 'h:' + (value[10] - parseInt(value[10])) * 15 + 'm ' + value[11] / 2 + '°C',
-                            ]
-                        },
-                    }
-                }
+                    return JSON.parse(`{ "program_auto_${days[value[0]]}": {
+                        "program": [{
+                            "0h:0m" : "${value[1] / 2} °C",
+                            "${parseInt(value[2] / 4)}h:${(value[2] - parseInt(value[2])) * 15}m": "${value[3] / 2} °C",
+                            "${parseInt(value[4] / 4)}h:${(value[4] - parseInt(value[4])) * 15}m": "${value[5] / 2} °C",
+                            "${parseInt(value[6] / 4)}h:${(value[6] - parseInt(value[6])) * 15}m": "${value[7] / 2} °C",
+                            "${parseInt(value[8] / 4)}h:${(value[8] - parseInt(value[8])) * 15}m": "${value[9] / 2} °C",
+                            "${parseInt(value[10] / 4)}h:${(value[10] - parseInt(value[10])) * 15}m" : "${value[11] / 2} °C"
+                        }]
+                    }}`);
 
             default:
                 meta.logger.info(`zigbee-herdsman-converters:AwowThermostat: NOT RECOGNIZED DP #${
