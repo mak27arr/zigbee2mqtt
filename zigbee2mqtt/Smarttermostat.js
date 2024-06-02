@@ -8,6 +8,7 @@ const e = exposes.presets;
 const ea = exposes.access;
 const tuya = require('zigbee-herdsman-converters/lib/tuya');
 const legacy = require('zigbee-herdsman-converters/lib/legacy');
+const thermostat_modes = {0: 'auto', 1: 'manual', 2: 'away'}; 
 
 const fz2 = {
     awow_thermostat: {
@@ -21,12 +22,11 @@ const fz2 = {
                 meta.logger.info(`awow_thermostat  dp #${dpValue.dp} value #${JSON.stringify(msg.data)} ${msg.data}`);
             switch (dpValue.dp) {
             case 2:
-                const modes = {0: 'auto', 1: 'manual', 2: 'away'};
                 var away_mode = 'OFF';
                 if (value == 2) {
                     away_mode = 'ON';
                 }
-                return {system_mode: modes[value], away_mode: away_mode};
+                return {thermostat_mode: thermostat_modes[value], system_mode: thermostat_modes[value], away_mode: away_mode};
 
             case 16: //HeatingSetpoint
                 const result = {};    
@@ -47,7 +47,7 @@ const fz2 = {
                 //97x = 2.673v
                 //135x = 3.052v
                 //157x = 3.268v
-                return {voltage: (value / 0.05).toFixed(1), battery: ((value / 0.05) - 2100) / 10}; //incorect
+                return {battery_Value: (value), voltage: (value / 0.05).toFixed(1), battery: ((value / 0.05) - 2100) / 10}; //incorect
 
             case 101: //comfort temperature
                 return {heat_temperature: (value / 2).toFixed(1)};
@@ -83,9 +83,6 @@ const fz2 = {
             case 114: // week "data":[6,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
             case 115: // sun "data":[7,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
                 const days = {0: '???', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday', 7: 'Sunday'};
-                //  SUN 20  6:00 21  9:00 22  10:00 23  23:00 17  24:00
-                // [7,  40, 24,  42, 36,  44, 40,   46, 92,   34, 96,    42,96,34,96,42,96,34]
-                //   1,   34, 24,  42,36,34,68,42,92,34,96,42,96,34,96,    42,96,34,96,42,96,34
                     return JSON.parse(`{ "program_auto_${days[value[0]]}": {
                         "program": [{
                             "0h:0m" : "${value[1] / 2} °C",
@@ -165,6 +162,27 @@ const tz2 = {
             await tuya.sendDataPointRaw(entity, 116, [0, 0 ,0, temp]);
         },
     },
+    awow_thermostat_heat_temperature: {
+        key: ['heat_temperature'],
+        convertSet: async (entity, key, value, meta) => {
+            const temp = parseInt(value * 2);
+            await tuya.sendDataPointRaw(entity, 101, [0, 0 ,0, temp]);
+        },
+    },
+    awow_thermostat_away_temperature: {
+        key: ['away_temperature'],
+        convertSet: async (entity, key, value, meta) => {
+            const temp = parseInt(value * 2);
+            await tuya.sendDataPointRaw(entity, 102, [0, 0 ,0, temp]);
+        },
+    },
+    awow_thermostat_thermostat_mode: {
+        key: ['thermostat_mode'],
+        convertSet: async (entity, key, value, meta) => {
+            var mode_key = Object.keys(thermostat_modes)[Object.values(thermostat_modes).indexOf(value)];
+            await tuya.sendDataPointRaw(entity, 2, [mode_key]);
+        },
+    },
 }
 
 const definition = {
@@ -188,6 +206,9 @@ const definition = {
         tz2.awow_thermostat_current_mode,
         tz2.awow_thermostat_lock,
         tz2.awow_thermostat_open_window_temperature,
+        tz2.awow_thermostat_heat_temperature,
+        tz2.awow_thermostat_away_temperature,
+        tz2.awow_thermostat_thermostat_mode,
     ],
     configure: async (device, coordinatorEndpoint, logger) => {
         const endpoint = device.getEndpoint(1);
@@ -202,6 +223,11 @@ const definition = {
         e.battery(),
         e.child_lock(),
         e.open_window_temperature().withValueMin(5).withValueMax(30),
+        exposes.numeric('heat_temperature', ea.STATE_SET).withValueMin(0.5).withValueMax(29.5).withValueStep(1)
+                .withUnit('C').withDescription('Heat temperature'),
+        exposes.numeric('away_temperature', ea.STATE_SET).withValueMin(0.5).withValueMax(29.5).withValueStep(1)
+                .withUnit('C').withDescription('Away temperature'),
+        exposes.enum('thermostat_mode', ea.ALL, ['auto', 'manual', 'away']),
     ],
 };
 
