@@ -81,15 +81,21 @@ const fz2 = {
             case 113: //"data":[5,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
             case 114: // week "data":[6,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
             case 115: // sun "data":[7,34,24,42,36,34,68,42,92,34,96,42,96,34,96,42,96,34]
+                function GetTimeFormValue(value) {
+                    var totalMin = value * 15;
+                    var min = totalMin % 60;
+                    var hours = (totalMin - min)/60;
+                    return `${hours}h:${min}m`;
+                }    
                 const days = {0: '???', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday', 7: 'Sunday'};
                     return JSON.parse(`{ "program_auto_${days[value[0]]}": {
                         "program": [{
                             "0h:0m" : "${value[1] / 2} °C",
-                            "${parseInt(value[2] / 4)}h:${(value[2] - parseInt(value[2])) * 15}m": "${value[3] / 2} °C",
-                            "${parseInt(value[4] / 4)}h:${(value[4] - parseInt(value[4])) * 15}m": "${value[5] / 2} °C",
-                            "${parseInt(value[6] / 4)}h:${(value[6] - parseInt(value[6])) * 15}m": "${value[7] / 2} °C",
-                            "${parseInt(value[8] / 4)}h:${(value[8] - parseInt(value[8])) * 15}m": "${value[9] / 2} °C",
-                            "${parseInt(value[10] / 4)}h:${(value[10] - parseInt(value[10])) * 15}m" : "${value[11] / 2} °C"
+                            "${GetTimeFormValue(value[2])}": "${value[3] / 2} °C",
+                            "${GetTimeFormValue(value[4])}": "${value[5] / 2} °C",
+                            "${GetTimeFormValue(value[6])}": "${value[7] / 2} °C",
+                            "${GetTimeFormValue(value[8])}": "${value[9] / 2} °C",
+                            "${GetTimeFormValue(value[10])}" : "${value[11] / 2} °C"
                         }]
                     }}`);
 
@@ -222,9 +228,9 @@ const definition = {
         e.battery(),
         e.child_lock(),
         e.open_window_temperature().withValueMin(5).withValueMax(30),
-        exposes.numeric('heat_temperature', ea.STATE_SET).withValueMin(0.5).withValueMax(29.5).withValueStep(1)
+        exposes.numeric('heat_temperature', ea.STATE_SET).withValueMin(0.5).withValueMax(29.5).withValueStep(0.5)
                 .withUnit('C').withDescription('Heat temperature'),
-        exposes.numeric('away_temperature', ea.STATE_SET).withValueMin(0.5).withValueMax(29.5).withValueStep(1)
+        exposes.numeric('away_temperature', ea.STATE_SET).withValueMin(0.5).withValueMax(29.5).withValueStep(0.5)
                 .withUnit('C').withDescription('Away temperature'),
         exposes.enum('thermostat_mode', ea.ALL, ['auto', 'manual', 'away']),
     ],
