@@ -19,7 +19,6 @@ const fz2 = {
             for (const dpValue of msg.data.dpValues) {
             
             const value = legacy.getDataValue(dpValue);
-                meta.logger.info(`awow_thermostat  dp #${dpValue.dp} value #${JSON.stringify(msg.data)} ${msg.data}`);
             switch (dpValue.dp) {
             case 2:
                 var away_mode = 'OFF';
